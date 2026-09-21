@@ -1,2 +1,1 @@
-# Lud-WS-SynthA_V2
-Lud-WS SynthA V2 module
+Synth A_V (X2) voci 2, 3, 4, 5
