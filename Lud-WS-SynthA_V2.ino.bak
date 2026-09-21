@@ -2,7 +2,7 @@
 // Lud-WS-SynthA_M — RP2040 synth a 1 voce (+2 sub_voci), nodo LWS
 // =====================================================================
 // REV 1 (LWS integration)
-// tes
+//
 // ARCHITETTURA
 // ---------------------------------------------------------------------
 //   Display ── 1 Mbps ──▶ Router ── 115200 ──▶ [a] SynthA_M (1 voce)
