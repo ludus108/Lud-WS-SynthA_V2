@@ -1,0 +1,46 @@
+# ==========================
+# PLATFORMIO
+# ==========================
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ==========================
+# BUILD FILES
+# ==========================
+*.elf
+*.hex
+*.bin
+*.map
+
+# ==========================
+# BACKUP FILES
+# ==========================
+*.bak
+*.old
+*.tmp
+*~
+
+# ==========================
+# SYSTEM FILES
+# ==========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.swn
+
+# ==========================
+# IDE / EDITOR
+# ==========================
+.idea/
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/browse.vc.db*
+.vscode/ipch/
+*.code-workspace
+
+# ==========================
+# FILE DI CONFIGURAZIONE LOCALE
+# ==========================
+# (aggiungi qui eventuali file con path assoluti personali)
