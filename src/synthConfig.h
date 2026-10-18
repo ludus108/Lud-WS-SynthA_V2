@@ -20,7 +20,7 @@
 // 1. IDENTITÀ DEL CHIP
 // -------------------------------------------------------------------------
 #ifndef MCU_ID
-  #define MCU_ID 'c'      // fallback di sicurezza
+  #define MCU_ID 'a'      // fallback di sicurezza
 #endif
 
 #if   MCU_ID == 'a'
@@ -91,7 +91,22 @@
 // -------------------------------------------------------------------------
 // 4. COSTANTI MOTORE
 // -------------------------------------------------------------------------
-#define PWM_IRQ_RATE_HZ   30000.0f  // ~frequenza IRQ con clkdiv=4, wrap=1023
+
+// -------------------------------------------------------------------------
+// PWM CLOCK — adattato automaticamente alla piattaforma
+// -------------------------------------------------------------------------
+// RP2040 : sys_clk = 125 MHz, clkdiv = 4.0 → IRQ ≈ 30.5 kHz
+// RP2350 : sys_clk = 150 MHz, clkdiv = 4.8 → IRQ ≈ 30.5 kHz
+// -------------------------------------------------------------------------
+#if defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+  #define PWM_CLKDIV_BASE   4.8f
+#else
+  #define PWM_CLKDIV_BASE   4.0f
+#endif
+
+#define PWM_IRQ_RATE_HZ   30500.0f   // costante su entrambe le piattaforme
+
+//// old #define PWM_IRQ_RATE_HZ   30000.0f  // ~frequenza IRQ con clkdiv=4, wrap=1023
 
 #define NOTE_STACK_MAX    8         // max note in stack per voce
 

@@ -1,24 +1,14 @@
 // =====================================================================
-// Lud-WS-SynthA_M — RP2040 synth a 1 voce (+2 sub_voci), nodo LWS
+// Lud-WS-SynthA_V2— RP2350 synth a 1 voce (+2 sub_voci), nodo LWS
 // =====================================================================
 // REV 1 (LWS integration)
-// tes
+//
 // ARCHITETTURA
 // ---------------------------------------------------------------------
-//   Display ── 1 Mbps ──▶ Router ── 115200 ──▶ [a] SynthA_M (1 voce)
-//                                                  │
-//                                                  │ Serial1 1 Mbps
-//                                                  ▼
-//                                              [b] SynthA_V_A (2 voci)
-//                                                  │
-//                                                  │ Serial2 1 Mbps
-//                                                  ▼
-//                                              [c] SynthA_V_B (2 voci)
+//   Display ── 1 Mbps ──▶ Router ── 115200 ──▶ [a] SynthA_M (voce 1) ──▶ [b] SynthA_V (voci 2 e 3) ──▶ [c] SynthA_V2 (voci 4 e 5).
 //
-// VOCI:
-//   'a' → voce globale 0 (VOCE_BASE=0, NUM_VOCI=1)
-//   'b' → voci globali 1, 2 (VOCE_BASE=1, NUM_VOCI=2)
-//   'c' → voci globali 3, 4 (VOCE_BASE=3, NUM_VOCI=2)
+// VOCE:
+//   'c' → voci globali 4, 5 (VOCE_BASE=1, NUM_VOCI=2)
 //
 // SUB_VOCI:
 //   Ogni voce ha 2 sub_voci:
@@ -35,15 +25,6 @@
 //   Il MIDI hardware è gestito solo dal Router.
 //   I comandi MIDI arrivano qui come CMD_MIDI_*_V via LWS.
 //
-// COSA È STATO RIMOSSO rispetto all'originale
-// ---------------------------------------------------------------------
-//   - #include <MIDI.h>, MIDI_CREATE_INSTANCE, MIDI.read(), ecc.
-//   - Encoder, bottoni, potenziometri, LED (pin e oggetti)
-//   - Display companion legacy (Serial2 = protocollo UI)
-//   - POLIMAX=6 (parafonia): sostituito da 2 sub_voci per voce
-//   - forward Vermona, waldorfCC, midiMode split ecc.
-//   - ctrlFuncA.h, pagineA.h, sendFuncA.h (interi)
-//
 // =====================================================================
 
 // ---------------------------------------------------------------------
@@ -51,7 +32,7 @@
 // ---------------------------------------------------------------------
 // Cambia questa riga (o passala come -D) per compilare i tre chip.
 #ifndef MCU_ID
-  #define MCU_ID 'a'          // 'a'=Master, 'b'=V_A, 'c'=V_B
+  #define MCU_ID 'c'          // 'a'=Master, 'b'=, SynthA_V, 'c'= questo
 #endif
 
 // ---------------------------------------------------------------------
@@ -108,7 +89,7 @@ const float levArr[21] = {
 };
 
 // --- Costanti globali ---
-const float masterFreq    = 4.0f;
+const float masterFreq    = PWM_CLKDIV_BASE;
 const float f0            = 30.0f;
 float       calb          = 6.58f;
 const float sampleLev     = 551.0f;
@@ -253,7 +234,6 @@ float intervalMul[49] = {};
 #include "synthEngine.h"    // IRQ, wavetable, ADSR, note stack, freq
 #include "synthControl.h"   // LFO tick, arp, gater per-voce
 #include "synthLws.h"       // callback LWS, bridge, poly broadcast
-
 // ---------------------------------------------------------------------
 // 4. SETUP
 // ---------------------------------------------------------------------
@@ -272,8 +252,8 @@ void setup() {
 
     // --- LWS callbacks ---
     lws_set_callbacks(on_param, on_error);
-    lws_set_synth_callbacks(on_param_voce, on_param_i32, on_param_i32_voce,
-                            on_midi_note_v, on_midi_bend_v, on_midi_cc_v);
+   /*  lws_set_synth_callbacks(on_param_voce, on_param_i32, on_param_i32_voce,
+                            on_midi_note_v, on_midi_bend_v, on_midi_cc_v); */
 
     // --- Motore audio ---
     pinMode(OUTPUT_ON_PIN, OUTPUT);
@@ -356,6 +336,10 @@ void loop() {
     // --- LWS: poll delle due porte ---
     pollRouter();       // synthLws.h
     pollChain();        // synthLws.h
+if (Serial.available()) {
+    char c = Serial.read();
+    if (c == '?') dumpStatus();
+}
 
     // --- LWS: retry pending ACK (sulla porta UP) ---
     // NB: l'header usa LWS_SERIAL (definita come LWS_PORT_UP in config).
